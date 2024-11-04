@@ -27,3 +27,7 @@ The application must also provide an interactive experience for an end-user to i
 • The distances provided in the WGUPS Distance Table are equal regardless of the direction traveled.
 
 • The day ends when all 40 packages have been delivered.
+
+## Extra Details
+
+I developed this project for my Data Structures and Algorithms II course and passed the course. My algorithm isn't thoroughly optimized as I was aiming to just meet the requirements and make sure the total distance traveled of the trucks is under 140 miles. My program includes a simple UI that opens up on a CMD tab when the program is run. The UI makes it simple and easy for users to receive information about each truck and package status at an inputted time and always displays the total distance covered by the three trucks. I created classes for packages and trucks to better keep track of specific variables of each object created for all the packages and trucks. I utilized a hash table with a unique hash function that allows all package deliveries to be tracked accurately and developed an adaptive algorithm that can be used even if the number of packages is altered.
