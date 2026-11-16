@@ -1,33 +1,94 @@
-# WGUPS-Truck-Delivery
+# WGUPS Routing Program
 
-## Project Scenario
-The Western Governors University Parcel Service (WGUPS) needs to determine an efficient route and delivery distribution for their Daily Local Deliveries (DLD) because packages are not currently being consistently delivered by their promised deadline. The Salt Lake City DLD route has three trucks, two drivers, and an average of 40 packages to deliver each day. Each package has specific criteria and delivery requirements.
+[![CI](https://github.com/aalatraqchi/WGUPS-Truck-Delivery/actions/workflows/ci.yml/badge.svg)](https://github.com/aalatraqchi/WGUPS-Truck-Delivery/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-The purpose of this project is to determine an algorithm, write code, and present a solution where all 40 packages (listed in the attached “WGUPS Package File”) will be delivered on time while meeting each package’s requirements and keeping the combined total distance traveled under 140 miles for both trucks. The specific delivery locations are shown on the attached “Salt Lake City Downtown Map,” and distances to each location are given in the attached “WGUPS Distance Table.” The intent is to use the program for this specific location and also for many other cities in each state where WGU has a presence.
+A package delivery routing program written in Python that plans routes for three trucks, delivers 40 packages on time under real-world constraints, and lets users check the status of any package or truck at any time of day.
 
-The application must also provide an interactive experience for an end-user to interact and query data regarding delivery packages and active delivery trucks at any point in time during the day.
+It routes every package in **122.1 miles**, under the 140-mile limit, using a greedy nearest-neighbor algorithm and a hash table built from scratch.
 
-## Assumptions
-• Each truck can carry a maximum of 16 packages, and the ID number of each package is unique.
+```text
+$ python -m wgups --time 10:30
+WGUPS Routing Program
+All 40 packages delivered in 122.1 miles.
 
-• The trucks travel at an average speed of 18 miles per hour and have an infinite amount of gas with no need to stop.
+Truck    Departs   Returns   Packages  Miles
+-------  --------  --------  --------  -----
+Truck 1  8:00 AM   10:05 AM  16        37.5
+Truck 2  9:05 AM   11:08 AM  11        36.8
+Truck 3  10:05 AM  12:45 PM  13        47.8
+Total                        40        122.1
 
-• There are no collisions.
+Status of all packages at 10:30 AM:
 
-• Three trucks and two drivers are available for deliveries. Each driver stays with the same truck as long as that truck is in service.
+ID  Address            City              Zip    Deadline  Weight  Truck    Status
+--  -----------------  ----------------  -----  --------  ------  -------  --------------------
+1   195 W Oakland Ave  Salt Lake City    84115  10:30 AM  21 kg   Truck 1  Delivered at 8:39 AM
+2   2530 S 500 E       Salt Lake City    84106  EOD       44 kg   Truck 3  En route on Truck 3
+3   233 Canyon Rd      Salt Lake City    84103  EOD       2 kg    Truck 2  En route on Truck 2
+6   3060 Lester St     West Valley City  84119  10:30 AM  88 kg   Truck 2  Delivered at 9:45 AM
+9   410 S State St     Salt Lake City    84111  EOD       2 kg    Truck 3  En route on Truck 3
+...
+```
 
-• Drivers leave the hub no earlier than 8:00 a.m., with the truck loaded, and can return to the hub for packages if needed.
+## Features
 
-• The delivery and loading times are instantaneous, i.e., no time passes while at a delivery or when moving packages to a truck at the hub (that time is factored into the calculation of the average speed of the trucks).
+- **Route Planning:** Nearest-neighbor routing for each truck, starting and ending at the hub.
+- **Constraint Handling:** Deadlines, truck-specific packages, delayed packages, packages that must travel together, a two-driver limit, and an address that is only corrected mid-day.
+- **Package Lookup:** A chaining hash table with automatic resizing stores every package for O(1) average lookups by ID.
+- **Status at Any Time:** See whether each package is delayed, at the hub, en route, or delivered (and when) at any time of day.
+- **Interactive Menu:** Look up all packages, a single package, or truck mileage from the terminal.
+- **Scriptable CLI:** Print a status snapshot with `--time` and `--package` for quick checks.
+- **Automated Testing:** 31 tests verify the hash table, the CLI, and every delivery requirement.
 
-• There is up to one special note associated with a package.
+## Tech Stack
 
-• The delivery address for package #9, Third District Juvenile Court, is wrong and will be corrected at 10:20 a.m. WGUPS is aware that the address is incorrect and will be updated at 10:20 a.m. However, WGUPS does not know the correct address (410 S State St., Salt Lake City, UT 84111) until 10:20 a.m.
+- **Language:** Python 3.10+ (standard library only, no dependencies)
+- **Data Structures:** Custom chaining hash table, symmetric distance matrix
+- **Algorithm:** Greedy nearest-neighbor routing
+- **Testing:** unittest
+- **CI:** GitHub Actions
 
-• The distances provided in the WGUPS Distance Table are equal regardless of the direction traveled.
+## Getting Started
 
-• The day ends when all 40 packages have been delivered.
+Clone the repository and run the interactive program from its root:
 
-## Extra Details
+```bash
+git clone https://github.com/aalatraqchi/WGUPS-Truck-Delivery.git
+cd WGUPS-Truck-Delivery
+python -m wgups
+```
 
-I developed this project for my Data Structures and Algorithms II course and passed the course. My algorithm isn't thoroughly optimized as I was aiming to just meet the requirements and make sure the total distance traveled of the trucks is under 140 miles. My program includes a simple UI that opens up on a CMD tab when the program is run. The UI makes it simple and easy for users to receive information about each truck and package status at an inputted time and always displays the total distance covered by the three trucks. I created classes for packages and trucks to better keep track of specific variables of each object created for all the packages and trucks. I utilized a hash table with a unique hash function that allows all package deliveries to be tracked accurately and developed an adaptive algorithm that can be used even if the number of packages is altered.
+Use `python3` instead of `python` if that's how Python 3 is installed on your system.
+
+Print a status snapshot and exit:
+
+```bash
+python -m wgups --time 10:30                # every package at 10:30 AM
+python -m wgups --time "1:15 PM" --package 9  # one package
+```
+
+## Testing
+
+```bash
+python -m unittest
+```
+
+The routing tests check the full day against the project requirements: all 40 packages delivered, every deadline met, under 140 total miles, at most 16 packages per truck, no more than two trucks on the road, and every special note honored.
+
+## Current Scope
+
+The program is built for the Salt Lake City scenario in the [project brief](docs/PROJECT-BRIEF.md). Package, address, and distance data are read from the CSV files in [`data/`](data/), so the routing works for any number of packages and locations. Which packages go on which truck and when each truck departs are set by hand in [`wgups/data.py`](wgups/data.py), based on the packages' special notes.
+
+Nearest-neighbor routing stays well under the mileage limit but doesn't guarantee the shortest possible route.
+
+This project was originally developed for the Data Structures and Algorithms II course at Western Governors University.
+
+## Documentation
+
+- [Algorithm & Design](docs/ALGORITHM.md): routing approach, data structures, complexity, and constraint handling
+- [Project Brief](docs/PROJECT-BRIEF.md): the original scenario, requirements, and assumptions
+
+## License
+
+[MIT](LICENSE). The scenario and the package, address, and distance data in `data/` come from the WGU course materials and are not covered by this license.
